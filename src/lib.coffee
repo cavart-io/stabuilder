@@ -56,3 +56,5 @@ build = () ->
   global.menu.sort sortBy 'order'
   list.map assign render
   list.map writeHtml
+
+module.exports = { build }

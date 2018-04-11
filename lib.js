@@ -113,4 +113,4 @@ build = function() {
   return list.map(writeHtml);
 };
 
-//console.log JSON.stringify (list.map (o) => [o.filename, o.outfile]), 0, 4
+module.exports = {build};
