@@ -1,0 +1,28 @@
+{
+  "name": "stabuilder",
+  "version": "0.1.0",
+  "description": "static site generator",
+  "main": "lib.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "coffee -o lib.js -bc src/lib.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ja-card/stabuilder.git"
+  },
+  "author": "Yury Tvardovsky <oziabr@google.com> (http://oziabr.info)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ja-card/stabuilder/issues"
+  },
+  "homepage": "https://github.com/ja-card/stabuilder#readme",
+  "devDependencies": {
+    "coffeescript": "^2.2.4"
+  },
+  "dependencies": {
+    "diveSync": "^0.3.0",
+    "front-matter": "^2.3.0",
+    "pug": "^2.0.3"
+  }
+}
