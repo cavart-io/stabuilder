@@ -1,4 +1,4 @@
-{exec} = require 'child_process'
+{execSync} = require 'child_process'
 fs = require 'fs'
 fm = require 'front-matter'
 path = require 'path'
@@ -12,10 +12,7 @@ global = {}
 
 
 run = (cmd) ->
-  exec cmd, (err, stdout, stderr) ->
-    throw err if err
-    console.log "stdout: #{stdout}" if stdout
-    console.log "stderr: #{stderr}" if stderr
+  execSync cmd
 
 listFiles = (dir = './', list = []) ->
   dive dir, (err, filename) => list[list.length] = { filename }
@@ -44,8 +41,10 @@ writeHtml = (item) =>
   file = path.join dir, 'index.html'
   run "mkdir -p #{dir}"
   fs.writeFileSync file, item.html
+  console.log "- #{file}"
 
 build = () ->
+  run "rm -rf #{outdir}"
   list = listFiles srcdir
   list.map assign outFilename
   list.map assign readFile
