@@ -48,7 +48,6 @@ writeHtml = (item) =>
   console.log "- #{file}"
 
 build = () ->
-  #run "rm -rf #{outdir}"
   list = listFiles srcdir
     .filter (item) -> !item.filename.includes 'README'
   list.map assign fileProps
@@ -58,7 +57,6 @@ build = () ->
   list.map assign globalObj
   list.map linkMenu
   list.map composeMenu
-  # return console.log global
   global.menu.sort sortBy 'order'
   list.map assign prepareMD
   list.map assign render
