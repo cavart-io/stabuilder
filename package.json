@@ -1,6 +1,6 @@
 {
   "name": "stabuilder",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "static site generator",
   "main": "lib.js",
   "scripts": {
@@ -21,10 +21,10 @@
     "coffeescript": "^2.2.4"
   },
   "dependencies": {
-    "jstransformer-coffee-script": "^1.1.1",
-    "jstransformer-markdown-it": "^2.0.0",
     "diveSync": "^0.3.0",
     "front-matter": "^2.3.0",
+    "jstransformer-coffee-script": "^1.1.1",
+    "jstransformer-markdown-it": "^2.0.0",
     "pug": "^2.0.3"
   }
 }
