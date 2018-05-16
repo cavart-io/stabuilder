@@ -17,6 +17,9 @@
     "url": "https://github.com/ja-card/stabuilder/issues"
   },
   "homepage": "https://github.com/ja-card/stabuilder#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "coffeescript": "^2.2.4"
   },

@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - "8.0"
+
+before_script:
+
+script: "yarn build"
+
+deploy:
+  provider: npm
+  email: "oziabr@gmail.com"
+  api_key: $NPM_AUTH_TOKEN
+  tag: next
+
+branches:
+  only:
+  - master
