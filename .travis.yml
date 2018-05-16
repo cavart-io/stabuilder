@@ -10,7 +10,8 @@ deploy:
   provider: npm
   email: "oziabr@gmail.com"
   api_key: $NPM_AUTH_TOKEN
-  tag: next
+  on:
+    tags: true
 
 branches:
   only:
