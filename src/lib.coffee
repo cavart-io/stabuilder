@@ -9,7 +9,7 @@ srcdir = './src/pages'
 outdir = './out'
 pretty = 0
 global = {}
-
+mdwrapper = fs.readFileSync "./src/mdwrapper.pug", 'utf-8'
 
 run = (cmd) ->
   execSync cmd
@@ -22,7 +22,9 @@ assign = (action) -> (item) -> Object.assign item, action item
 
 sortBy = (property, desc) -> (a, b) -> (a[property] > b[property]) ^ desc
 
-outFilename = (item) => outfile: (item.filename.slice srcdir.length, - '.pug'.length).replace /index$/, ''
+fileProps = (item, parts = item.filename.match /(\w+)\/(\w+)\.(\w+)/i) => fileclass: parts[1], outfile: parts[2], filetype: parts[3]
+
+cleanIndexNames = (item) => outfile: if item.outfile == 'index' then '' else item.outfile
 
 readFile = (item) => content: fs.readFileSync item.filename, 'utf-8'
 
@@ -30,11 +32,13 @@ parseFM = (item) => fm item.content
 
 globalObj = () => {global}
 
+prepareMD = (item) => body: if item.filetype != 'md' then item.body else "#{mdwrapper}\n#{item.body.replace /^/gm, '    '}"
+
 render = (item) => html: pug.render item.body, item
 
-linkMenu = (item) => Object.assign item.attributes.menu, path: item.outfile
+linkMenu = (item) => item.attributes.menu && Object.assign item.attributes.menu, path: "/#{item.outfile}"
 
-composeMenu = (item) => (item.global.menu ?= []).push item.attributes.menu
+composeMenu = (item) => item.attributes.menu && (item.global.menu ?= []).push item.attributes.menu
 
 writeHtml = (item) =>
   dir = path.join outdir, item.outfile
@@ -44,15 +48,19 @@ writeHtml = (item) =>
   console.log "- #{file}"
 
 build = () ->
-  run "rm -rf #{outdir}"
+  #run "rm -rf #{outdir}"
   list = listFiles srcdir
-  list.map assign outFilename
+    .filter (item) -> !item.filename.includes 'README'
+  list.map assign fileProps
+  list.map assign cleanIndexNames
   list.map assign readFile
   list.map assign parseFM
   list.map assign globalObj
   list.map linkMenu
   list.map composeMenu
+  # return console.log global
   global.menu.sort sortBy 'order'
+  list.map assign prepareMD
   list.map assign render
   list.map writeHtml
 
