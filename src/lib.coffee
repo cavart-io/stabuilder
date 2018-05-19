@@ -22,9 +22,13 @@ assign = (action) -> (item) -> Object.assign item, action item
 
 sortBy = (property, desc) -> (a, b) -> (a[property] > b[property]) ^ desc
 
+filterFiles = (item) -> !item.filename.includes 'README'
+
 fileProps = (item, parts = item.filename.match /(\w+)\/(\w+)\.(\w+)/i) => fileclass: parts[1], outfile: parts[2], filetype: parts[3]
 
-cleanIndexNames = (item) => outfile: if item.outfile == 'index' then '' else item.outfile
+filterIndexes = (item) => item.outfile == 'index'
+
+cleanIndexNames = (item) => outfile: ''
 
 readFile = (item) => content: fs.readFileSync item.filename, 'utf-8'
 
@@ -32,13 +36,23 @@ parseFM = (item) => fm item.content
 
 globalObj = () => {global}
 
-prepareMD = (item) => body: if item.filetype != 'md' then item.body else "#{mdwrapper}\n#{item.body.replace /^/gm, '    '}"
+filterMD = (item) => item.filetype == 'md'
 
-render = (item) => html: pug.render item.body, item
+prepareMDMixins = (item) => { body: item.body
+    .split "\n"
+    .map (item) => if item.match /\+[a-z]/i then "#{item}\n:markdown-it" else "  #{item}"
+    .join "\n"
+  }
+
+prepareMD = (item) => body: "#{mdwrapper}#{item.body.replace /^/gm, '  '}"
+
+filterWithMenu = (item) => item.attributes.menu
 
 linkMenu = (item) => item.attributes.menu && Object.assign item.attributes.menu, path: "/#{item.outfile}"
 
 composeMenu = (item) => item.attributes.menu && (item.global.menu ?= []).push item.attributes.menu
+
+render = (item) => html: pug.render item.body, item
 
 writeHtml = (item) =>
   dir = path.join outdir, item.outfile
@@ -49,16 +63,22 @@ writeHtml = (item) =>
 
 build = () ->
   list = listFiles srcdir
-    .filter (item) -> !item.filename.includes 'README'
+      .filter filterFiles
   list.map assign fileProps
-  list.map assign cleanIndexNames
+  list.filter filterIndexes
+      .map assign cleanIndexNames
   list.map assign readFile
   list.map assign parseFM
   list.map assign globalObj
-  list.map linkMenu
-  list.map composeMenu
+  list.filter filterWithMenu
+      .map linkMenu
+  list.filter filterWithMenu
+      .map composeMenu
   global.menu.sort sortBy 'order'
-  list.map assign prepareMD
+  list.filter filterMD
+      .map assign prepareMDMixins
+  list.filter filterMD
+      .map assign prepareMD
   list.map assign render
   list.map writeHtml
 
