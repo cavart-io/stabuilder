@@ -12,6 +12,8 @@ pretty = 0
 menu   = []
 mdwrapper = fs.readFileSync "./src/mdwrapper.pug", 'utf-8'
 
+try console.log 'Building with stabuilder v_' + require(path.join __dirname, 'package.json').version
+
 run = (cmd) -> execSync cmd
 
 listFiles = (dir = './', list = [], _x = dive dir, (err, filename) => list[list.length] = { filename }) -> list

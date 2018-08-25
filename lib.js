@@ -25,6 +25,10 @@ menu = [];
 
 mdwrapper = fs.readFileSync("./src/mdwrapper.pug", 'utf-8');
 
+try {
+  console.log('Building with stabuilder v_' + require(path.join(__dirname, 'package.json')).version);
+} catch (error) {}
+
 run = function(cmd) {
   return execSync(cmd);
 };
