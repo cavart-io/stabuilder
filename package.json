@@ -1,6 +1,6 @@
 {
   "name": "stabuilder",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "static site generator",
   "main": "lib.js",
   "scripts": {

@@ -5,24 +5,26 @@ path = require 'path'
 pug = require 'pug'
 dive = require 'diveSync'
 
-srcdir = './src/pages'
+srcdir = './src'
+types  = ['.md', '.pug', '.mdm']
 outdir = './out'
 pretty = 0
-global = {}
+menu   = []
 mdwrapper = fs.readFileSync "./src/mdwrapper.pug", 'utf-8'
 
-run = (cmd) ->
-  execSync cmd
+run = (cmd) -> execSync cmd
 
-listFiles = (dir = './', list = []) ->
-  dive dir, (err, filename) => list[list.length] = { filename }
-  list
+listFiles = (dir = './', list = [], _x = dive dir, (err, filename) => list[list.length] = { filename }) -> list
 
-assign = (action) -> (item) -> Object.assign item, action item
+assign = (filter, action) -> (item) -> if filter(item) then Object.assign item, action item
 
 sortBy = (property, desc) -> (a, b) -> (a[property] > b[property]) ^ desc
 
-filterFiles = (item) -> !item.filename.includes 'README'
+noFilter = () => true
+
+filterFiles = (types) => (item) => !item.filename.includes('README') && types.find (e) => item.filename.endsWith e
+
+filterClasses = (classes) => (item) => classes.find (e) => item.fileclass.endsWith e
 
 fileProps = (item, parts = item.filename.match /(\w+)\/(\w+)\.(\w+)/i) => fileclass: parts[1], outfile: parts[2], filetype: parts[3]
 
@@ -34,23 +36,12 @@ readFile = (item) => content: fs.readFileSync item.filename, 'utf-8'
 
 parseFM = (item) => fm item.content
 
-globalObj = () => {global}
+prepareMD = (item) => body:
+  mdwrapper + item.body.replace /^(.*)$/mg, (a, b) => if b.match /^\+\w/ then "  #{a}\n  :markdown-it" else '    '+a
 
-filterMD = (item) => item.filetype == 'md'
-
-prepareMDMixins = (item) => { body: item.body
-    .split "\n"
-    .map (item) => if item.match /\+[a-z]/i then "#{item}\n:markdown-it" else "  #{item}"
-    .join "\n"
-  }
-
-prepareMD = (item) => body: "#{mdwrapper}#{item.body.replace /^/gm, '  '}"
-
-filterWithMenu = (item) => item.attributes.menu
-
-linkMenu = (item) => item.attributes.menu && Object.assign item.attributes.menu, path: "/#{item.outfile}"
-
-composeMenu = (item) => item.attributes.menu && (item.global.menu ?= []).push item.attributes.menu
+makeMenu = (item) => global: menu:
+  (if item.attributes.menu then [menu.push(Object.assign item.attributes.menu, path: "/#{item.outfile}"), menu][1] else menu)
+    .sort sortBy 'order'
 
 render = (item) => html: pug.render item.body, item
 
@@ -62,24 +53,15 @@ writeHtml = (item) =>
   console.log "- #{file}"
 
 build = () ->
-  list = listFiles srcdir
-      .filter filterFiles
-  list.map assign fileProps
-  list.filter filterIndexes
-      .map assign cleanIndexNames
-  list.map assign readFile
-  list.map assign parseFM
-  list.map assign globalObj
-  list.filter filterWithMenu
-      .map linkMenu
-  list.filter filterWithMenu
-      .map composeMenu
-  global.menu.sort sortBy 'order'
-  list.filter filterMD
-      .map assign prepareMDMixins
-  list.filter filterMD
-      .map assign prepareMD
-  list.map assign render
-  list.map writeHtml
+  list = listFiles(srcdir).filter filterFiles(types)
+  list.map assign   noFilter,                     fileProps
+  list.map assign   filterIndexes,                cleanIndexNames
+  list.map assign   noFilter,                     readFile
+  list.map assign   filterFiles(['pug', 'md']),   parseFM
+  list.map assign   noFilter,                     makeMenu
+  list.map assign   filterFiles(['md']),          prepareMD
+  list.map assign   filterClasses(['pages']),     render
+  list.map assign   filterClasses(['pages']),     writeHtml
+  return list
 
 module.exports = { build }
