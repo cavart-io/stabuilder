@@ -54,16 +54,20 @@ writeHtml = (item) =>
   fs.writeFileSync file, item.html
   console.log "- #{file}"
 
+moveAssets = () =>
+  run "cp -R ./static #{outdir}"
+
 build = () ->
   list = listFiles(srcdir).filter filterFiles(types)
   list.map assign   noFilter,                     fileProps
   list.map assign   filterIndexes,                cleanIndexNames
   list.map assign   noFilter,                     readFile
   list.map assign   filterFiles(['pug', 'md']),   parseFM
-  list.map assign   noFilter,                     makeMenu
+  list.map assign   filterClasses(['pages']),     makeMenu
   list.map assign   filterFiles(['md']),          prepareMD
   list.map assign   filterClasses(['pages']),     render
   list.map assign   filterClasses(['pages']),     writeHtml
-  return list
+  moveAssets()
+  list
 
 module.exports = { build }
