@@ -28,6 +28,6 @@
     "front-matter": "^2.3.0",
     "jstransformer-coffee-script": "^1.1.1",
     "jstransformer-markdown-it": "^2.0.0",
-    "pug": "^2.0.3"
+    "pug": "^3.0.1"
   }
 }
